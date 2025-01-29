@@ -14,7 +14,7 @@ https://api.g2bulk.com/v1/
   - [Category Endpoints](#category-endpoints)
 - [Protected Endpoints](#protected-endpoints)
   - [User Endpoints](#user-endpoints)
-  - [Admin Endpoints](#admin-endpoints)
+
 - [Rate Limiting](#rate-limiting)
 - [Error Handling](#error-handling)
 - [Support](#support)
