@@ -24,6 +24,7 @@ https://api.g2bulk.com/v1/
 - [Orders](#orders)
 - [Games & Top-up Services](#games--top-up-services)
 - [Transactions](#transactions)
+- [Plans & Subscriptions](#plans--subscriptions)
 - [Rate Limiting](#rate-limiting)
 - [Error Handling](#error-handling)
 - [Support](#support)
@@ -451,6 +452,195 @@ Retrieve complete transaction history including balance additions, charges, and 
 |------|-------------|
 | `add_balance` | Balance added (manual addition or refund) |
 | `charge_balance` | Balance deducted (purchase or top-up) |
+
+---
+
+## Plans & Subscriptions
+
+Users can subscribe to recurring plans. Balance is deducted when creating a subscription, and only one active subscription is allowed at a time.
+
+### Get All Plans
+
+Retrieve all available subscription plans with pricing and duration details.
+
+- **Endpoint:** `GET /v1/plans`
+- **Authentication:** Public
+- **Response:**
+  ```json
+  {
+    "success": true,
+    "plans": [
+      {
+        "ID": 1,
+        "CreatedAt": "2025-11-27T10:00:00Z",
+        "UpdatedAt": "2025-11-27T10:00:00Z",
+        "DeletedAt": null,
+        "name": "Basic Plan",
+        "description": "Basic subscription with standard features",
+        "price": 9.99,
+        "duration_days": 30
+      },
+      {
+        "ID": 2,
+        "CreatedAt": "2025-11-27T10:00:00Z",
+        "UpdatedAt": "2025-11-27T10:00:00Z",
+        "DeletedAt": null,
+        "name": "Premium Plan",
+        "description": "Premium subscription with all features",
+        "price": 29.99,
+        "duration_days": 30
+      }
+    ]
+  }
+  ```
+
+### Get Plan by ID
+
+Retrieve detailed information about a specific subscription plan.
+
+- **Endpoint:** `GET /v1/plans/:id`
+- **Authentication:** Public
+- **Response:**
+  ```json
+  {
+    "success": true,
+    "plan": {
+      "ID": 1,
+      "CreatedAt": "2025-11-27T10:00:00Z",
+      "UpdatedAt": "2025-11-27T10:00:00Z",
+      "DeletedAt": null,
+      "name": "Basic Plan",
+      "description": "Basic subscription with standard features",
+      "price": 9.99,
+      "duration_days": 30
+    }
+  }
+  ```
+
+### Create Subscription
+
+Create a subscription for the authenticated user. Plan price is automatically deducted.
+
+- **Endpoint:** `POST /v1/subscriptions`
+- **Authentication:** Required
+- **Request Body:**
+  ```json
+  {
+    "plan_id": 1
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "success": true,
+    "subscription": {
+      "ID": 1,
+      "CreatedAt": "2025-11-27T12:00:00Z",
+      "UpdatedAt": "2025-11-27T12:00:00Z",
+      "DeletedAt": null,
+      "user_id": 123456,
+      "plan_id": 1,
+      "start_date": "2025-11-27T12:00:00Z",
+      "end_date": "2025-12-27T12:00:00Z",
+      "status": "active",
+      "plan": {
+        "ID": 1,
+        "name": "Basic Plan",
+        "description": "Basic subscription with standard features",
+        "price": 9.99,
+        "duration_days": 30
+      }
+    }
+  }
+  ```
+
+**⚠️ Requirements:**
+
+- User must have sufficient balance
+- Only one active subscription per user
+- A transaction record is automatically created
+
+### Get User Subscriptions
+
+Retrieve all subscriptions (past and present) for the authenticated user.
+
+- **Endpoint:** `GET /v1/subscriptions`
+- **Authentication:** Required
+- **Response:**
+  ```json
+  {
+    "success": true,
+    "subscriptions": [
+      {
+        "ID": 1,
+        "CreatedAt": "2025-11-27T12:00:00Z",
+        "UpdatedAt": "2025-11-27T12:00:00Z",
+        "DeletedAt": null,
+        "user_id": 123456,
+        "plan_id": 1,
+        "start_date": "2025-11-27T12:00:00Z",
+        "end_date": "2025-12-27T12:00:00Z",
+        "status": "active",
+        "plan": {
+          "ID": 1,
+          "name": "Basic Plan",
+          "price": 9.99,
+          "duration_days": 30
+        }
+      }
+    ]
+  }
+  ```
+
+### Get Active Subscription
+
+Retrieve the currently active subscription for the authenticated user.
+
+- **Endpoint:** `GET /v1/subscriptions/active`
+- **Authentication:** Required
+- **Response (Active Found):**
+  ```json
+  {
+    "success": true,
+    "subscription": {
+      "ID": 1,
+      "user_id": 123456,
+      "plan_id": 1,
+      "start_date": "2025-11-27T12:00:00Z",
+      "end_date": "2025-12-27T12:00:00Z",
+      "status": "active",
+      "plan": {
+        "ID": 1,
+        "name": "Basic Plan",
+        "price": 9.99,
+        "duration_days": 30
+      }
+    }
+  }
+  ```
+- **Response (No Active Subscription):**
+  ```json
+  {
+    "success": false,
+    "message": "No active subscription found"
+  }
+  ```
+
+### Cancel Subscription
+
+Cancel a subscription. Status changes to `cancelled`; no refund is issued.
+
+- **Endpoint:** `POST /v1/subscriptions/:id/cancel`
+- **Authentication:** Required
+- **Response:**
+  ```json
+  {
+    "success": true,
+    "message": "Subscription cancelled successfully"
+  }
+  ```
+
+**⚠️ Note:** Cancelling a subscription does not provide a refund and the subscription cannot be reactivated.
 
 ---
 
